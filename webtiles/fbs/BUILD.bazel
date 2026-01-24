@@ -1,0 +1,114 @@
+load("@flatbuffers//:build_defs.bzl", "flatbuffer_cc_library")
+
+exports_files([
+    "header.fbs",
+    "sparse_block.fbs",
+    "response_params.fbs",
+])
+
+flatbuffer_cc_library(
+    name = "cc_fbs",
+    srcs = [
+        "header.fbs",
+        "response_params.fbs",
+        "sparse_block.fbs",
+    ],
+    visibility = ["//visibility:public"],
+)
+
+genrule(
+    name = "lua_fbs",
+    srcs = [
+        "header.fbs",
+        "sparse_block.fbs",
+        "response_params.fbs",
+    ],
+    outs = [
+        "BlockType.lua",
+        "DenseLocations.lua",
+        "FileHeader.lua",
+        "Header.lua",
+        "HeaderSignature.lua",
+        "HeaderSize.lua",
+        "HeaderVersion.lua",
+        "IndexFormat.lua",
+        "IndexHeader.lua",
+        "IndexMagic.lua",
+        "LinkItem.lua",
+        "LocationItem.lua",
+        "Location.lua",
+        "ResponseParams.lua",
+        "SparseBlock.lua",
+        "SparseLocations.lua",
+    ],
+    cmd = """
+$(location @flatbuffers//:flatc) --lua $(SRCS)
+cp ./webtiles/fbs/* $(@D)
+""",
+    tools = ["@flatbuffers//:flatc"],
+)
+
+genrule(
+    name = "ts_fbs",
+    srcs = [
+        "header.fbs",
+        "sparse_block.fbs",
+        "response_params.fbs",
+    ],
+    outs = [
+        "block-type.ts",
+        "dense-locations.ts",
+        "file-header.ts",
+        "header-signature.ts",
+        "header-size.ts",
+        "header.ts",
+        "header-version.ts",
+        "index-format.ts",
+        "index-header.ts",
+        "index-magic.ts",
+        "link-item.ts",
+        "location-item.ts",
+        "location.ts",
+        "response-params.ts",
+        "sparse-block.ts",
+        "sparse-locations.ts",
+    ],
+    cmd = """
+$(location @flatbuffers//:flatc) --ts --ts-no-import-ext --ts-omit-entrypoint $(SRCS)
+find ./webtiles -name "*.ts" -exec sed -i "s/\\.\\.\\/webtiles\\///g" {} +
+cp ./webtiles/fbs/* $(@D)
+""",
+    tools = ["@flatbuffers//:flatc"],
+)
+
+genrule(
+    name = "go_fbs",
+    srcs = [
+        "header.fbs",
+        "sparse_block.fbs",
+        "response_params.fbs",
+    ],
+    outs = [
+        "BlockType.go",
+        "DenseLocations.go",
+        "FileHeader.go",
+        "Header.go",
+        "HeaderSignature.go",
+        "HeaderSize.go",
+        "HeaderVersion.go",
+        "IndexFormat.go",
+        "IndexHeader.go",
+        "IndexMagic.go",
+        "LinkItem.go",
+        "Location.go",
+        "LocationItem.go",
+        "ResponseParams.go",
+        "SparseBlock.go",
+        "SparseLocations.go",
+    ],
+    cmd = """
+$(location @flatbuffers//:flatc) --go --go-namespace "fbs" $(SRCS)
+cp ./fbs/* $(@D)
+""",
+    tools = ["@flatbuffers//:flatc"],
+)

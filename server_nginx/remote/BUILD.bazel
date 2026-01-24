@@ -1,0 +1,15 @@
+load("@rules_pkg//pkg:tar.bzl", "pkg_tar")
+
+pkg_tar(
+    name = "docker_pkg",
+    srcs = [
+        "Dockerfile",
+        "handle_tiles.lua",
+        "nginx.conf",
+    ],
+    extension = "tar.gz",
+    deps = [
+        "//lua:flatbuffers_pkg",
+        "//lua:lua_pkg",
+    ],
+)

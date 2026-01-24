@@ -1,0 +1,108 @@
+load("@bazel_skylib//rules:copy_file.bzl", "copy_file")
+load("@rules_pkg//pkg:tar.bzl", "pkg_tar")
+load("@rules_shell//shell:sh_test.bzl", "sh_test")
+
+filegroup(
+    name = "lua",
+    srcs = [
+        "webtiles.lua",
+        "webtiles_basic.lua",
+    ] + glob(["webtiles/**/*.lua"]),
+    visibility = ["//visibility:public"],
+)
+
+FLATBUFFERS_LUA_FILES = [
+    "flatbuffers.lua",
+    "flatbuffers/binaryarray.lua",
+    "flatbuffers/builder.lua",
+    "flatbuffers/compat_5_1.lua",
+    "flatbuffers/compat_5_3.lua",
+    "flatbuffers/compat.lua",
+    "flatbuffers/compat_luajit.lua",
+    "flatbuffers/numTypes.lua",
+    "flatbuffers/view.lua",
+]
+
+[
+    copy_file(
+        name = "flatbuffers_copy_" + file,
+        src = "@flatbuffers_lua//:" + file,
+        out = file,
+    )
+    for file in FLATBUFFERS_LUA_FILES
+]
+
+filegroup(
+    name = "flatbuffers",
+    srcs = FLATBUFFERS_LUA_FILES,
+    visibility = ["//visibility:public"],
+)
+
+pkg_tar(
+    name = "lua_pkg",
+    srcs = [":lua"],
+    package_dir = "lua",
+    strip_prefix = ".",
+    visibility = ["//:__subpackages__"],
+)
+
+pkg_tar(
+    name = "flatbuffers_pkg",
+    srcs = [":flatbuffers"],
+    package_dir = "lua",
+    strip_prefix = ".",
+    visibility = ["//:__subpackages__"],
+)
+
+sh_test(
+    name = "tests_lua",
+    srcs = ["@lua"],
+    args = ["$(location webtiles_test.lua)"],
+    data = [
+        "webtiles_test.lua",
+        ":flatbuffers",
+        ":lua",
+        "//testdata",
+        "@lua",
+    ],
+    env = {"LUA_PATH": "lua/?.lua;;"},
+)
+
+# TODO(eak1mov): fix toolchain
+sh_test(
+    name = "tests_luajit",
+    srcs = ["@luajit"],
+    args = ["$(location webtiles_test.lua)"],
+    data = [
+        "webtiles_test.lua",
+        ":flatbuffers",
+        ":lua",
+        "//testdata",
+        "@luajit",
+    ],
+    env = {"LUA_PATH": "lua/?.lua;;"},
+)
+
+# TODO(eak1mov): fix toolchain
+sh_test(
+    name = "tests_luajit_basic",
+    srcs = ["@luajit"],
+    args = ["$(location webtiles_basic_test.lua)"],
+    data = [
+        "webtiles_basic_test.lua",
+        ":flatbuffers",
+        ":lua",
+        "//testdata",
+        "@luajit",
+    ],
+    env = {"LUA_PATH": "lua/?.lua;;"},
+)
+
+test_suite(
+    name = "tests",
+    tests = [
+        ":tests_lua",
+        ":tests_luajit",
+        ":tests_luajit_basic",
+    ],
+)

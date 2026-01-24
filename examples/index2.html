@@ -1,0 +1,66 @@
+<html>
+
+<head>
+    <title>Example2 (compressed tiles)</title>
+    <meta charset="utf-8" />
+    <link rel="stylesheet" href="https://unpkg.com/maplibre-gl@5.0.1/dist/maplibre-gl.css" crossorigin="anonymous">
+    <script src="https://unpkg.com/maplibre-gl@5.0.1/dist/maplibre-gl.js" crossorigin="anonymous"></script>
+    <script src="https://unpkg.com/pako@2.0.4/dist/pako.min.js"></script>
+    <script src="https://unpkg.com/@protomaps/basemaps@5.5.1/dist/basemaps.js"></script>
+    <script src="webtiles.js"></script>
+    <style>
+        body {
+            margin: 0;
+        }
+
+        #map {
+            height: 100%;
+            width: 100%;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="map"></div>
+    <script type="text/javascript">
+        //const TILES_URL = "webtiles:///example2.wtiles";
+        //const TILES_URL = "webtiles:////mycloud.net/my-bucket/example2.wtiles";
+        const TILES_URL = "webtiles:////eak1mov.github.io/tiles-paper/example2_sf.tiles";
+
+        maplibregl.addProtocol("webtiles", webtiles.protocols.maplibregl({
+            fetchRequest: async (url, headers, signal) => {
+                const resp = await fetch(url, { headers, signal });
+                return await resp.arrayBuffer();
+            },
+            contentDecoder: async (buffer, params) => {
+                if (params.contentEncoding() === "gzip") {
+                    buffer = pako.ungzip(buffer);
+                }
+                return buffer;
+            },
+        }));
+
+        const map = new maplibregl.Map({
+            container: "map",
+            zoom: 13,
+            center: [-122.44, 37.78],
+            //hash: true,
+            style: {
+                version: 8,
+                glyphs: "https://protomaps.github.io/basemaps-assets/fonts/{fontstack}/{range}.pbf",
+                sprite: "https://protomaps.github.io/basemaps-assets/sprites/v4/light",
+                sources: {
+                    example_source: {
+                        type: "vector",
+                        url: TILES_URL,
+                        maxzoom: 15,
+                        attribution: `<a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>`,
+                    },
+                },
+                layers: basemaps.layers("example_source", basemaps.namedFlavor("light"), { lang: "en" }),
+            },
+        });
+    </script>
+</body>
+
+</html>

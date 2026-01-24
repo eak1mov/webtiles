@@ -1,0 +1,44 @@
+namespace webtiles.fbs;
+
+// Two uint32 instead of one uint64 are used here for packed 4-byte alignment
+// for array of LocationItem in SparseLocations (instead of 8-byte alignment).
+// Actual format: 40 bits for offset and 24 bits for size (little-endian).
+// |40 bit offset|24 bit size|
+// |0          39|40       63|
+struct Location {
+    v0: uint32;
+    v1: uint32;
+}
+
+struct LocationItem {
+    // 16-bit tile coordinates (x and y) encoded with z-order curve (Morton code)
+    tile_code: uint32 (key);
+    location: Location;
+}
+
+struct LinkItem {
+    tile_code: uint32 (key);
+    link_code: uint32;
+}
+
+table SparseLocations {
+    tiles: [LocationItem];
+    links: [LinkItem];
+}
+
+table DenseLocations {
+    // tile_code -> Location
+    locations: [Location];
+}
+
+enum BlockType : uint32 { Invalid = 0, Dense = 1, Sparse = 2 }
+
+table SparseBlock {
+    block_type: BlockType;
+    // zoom -> DenseLocations
+    dense_locations: [DenseLocations];
+    // zoom -> SparseLocations
+    sparse_locations: [SparseLocations];
+}
+
+root_type SparseBlock;

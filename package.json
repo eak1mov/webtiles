@@ -1,0 +1,53 @@
+{
+  "name": "webtiles",
+  "version": "0.1.0",
+  "description": "Modern Tile Storage Format",
+  "license": "MIT",
+  "private": false,
+  "type": "module",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.mjs",
+  "browser": "./dist/webtiles.min.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "browser": "./dist/webtiles.min.js",
+      "node": {
+        "import": "./dist/index.mjs",
+        "require": "./dist/index.cjs"
+      },
+      "default": "./dist/index.mjs"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "npm run clean && npm run build:cjs && npm run build:esm && npm run build:browser && npm run build:types",
+    "build:browser": "esbuild ts/index.ts --bundle --sourcemap --platform=browser --format=iife --global-name=webtiles --minify --outfile=dist/webtiles.min.js",
+    "build:browser_dev": "esbuild ts/index.ts --bundle --sourcemap --platform=browser --format=iife --global-name=webtiles --outfile=dist/webtiles.js",
+    "build:cjs": "esbuild ts/index.ts --bundle --sourcemap --platform=node --format=cjs --external:flatbuffers --outfile=dist/index.cjs",
+    "build:esm": "esbuild ts/index.ts --bundle --sourcemap --platform=node --format=esm --external:flatbuffers --outfile=dist/index.mjs",
+    "build:types": "tsc --project tsconfig.json",
+    "build_examples": "npm run build:browser && cp dist/webtiles.min.js examples/webtiles.min.js",
+    "build_examples_dev": "npm run build:browser_dev && cp dist/webtiles.js examples/webtiles.js",
+    "build_testdata": "bazel build //testdata",
+    "clean": "rm -rf dist && rm -f examples/*.js",
+    "lint": "eslint -c ts/eslint.config.js ts/*.ts",
+    "prepublishOnly": "npm run build",
+    "test": "jest --preset ts-jest",
+    "test_coverage": "jest --preset ts-jest --coverage"
+  },
+  "dependencies": {
+    "flatbuffers": "^25.2.10"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.37.0",
+    "esbuild": "^0.25.12",
+    "eslint": "^9.39.2",
+    "jest": "^30.2.0",
+    "ts-jest": "^29.4.5",
+    "typescript-eslint": "^8.46.0"
+  }
+}

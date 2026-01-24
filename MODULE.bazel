@@ -1,0 +1,115 @@
+"""
+WebTiles: Modern Tile Storage Format
+"""
+
+module(name = "webtiles", version = "0.1.0")
+
+bazel_dep(name = "abseil-cpp", version = "20250512.1")
+bazel_dep(name = "flatbuffers", version = "25.2.10")
+bazel_dep(name = "rules_cc", version = "0.2.2")
+bazel_dep(name = "xxhash", version = "0.8.3")
+
+bazel_dep(name = "bazel_skylib", version = "1.8.1", dev_dependency = True)  # for lua, testdata
+bazel_dep(name = "fmt", version = "11.2.0", dev_dependency = True)  # for converter
+bazel_dep(name = "google_benchmark", version = "1.9.4", dev_dependency = True)
+bazel_dep(name = "googletest", version = "1.17.0", dev_dependency = True)
+bazel_dep(name = "pigz", version = "2.8", dev_dependency = True)  # for testdata
+bazel_dep(name = "re2", version = "2025-08-12", dev_dependency = True)  # for converter
+bazel_dep(name = "rules_pkg", version = "1.1.0", dev_dependency = True)  # for lua, server_nginx, testdata
+bazel_dep(name = "rules_shell", version = "0.6.1", dev_dependency = True)  # for lua
+bazel_dep(name = "sqlite3", version = "3.50.2", dev_dependency = True)  # for converter
+
+################################################################################
+# toolchains
+################################################################################
+
+# https://github.com/bazel-contrib/toolchains_llvm/blob/master/toolchain/internal/llvm_distributions.bzl
+# wget http://security.ubuntu.com/ubuntu/pool/universe/n/ncurses/libtinfo5_6.3-2ubuntu0.1_amd64.deb
+# sudo dpkg -i libtinfo5_6.3-2ubuntu0.1_amd64.deb
+bazel_dep(name = "toolchains_llvm", version = "1.5.0", dev_dependency = True)
+llvm = use_extension("@toolchains_llvm//toolchain/extensions:llvm.bzl", "llvm")
+llvm.toolchain(llvm_version = "18.1.8")
+use_repo(llvm, "llvm_toolchain")
+
+bazel_dep(name = "hermetic_cc_toolchain", version = "3.1.0", dev_dependency = True)
+toolchains = use_extension("@hermetic_cc_toolchain//toolchain:ext.bzl", "toolchains")
+use_repo(toolchains, "zig_sdk")
+
+# register_toolchains("@llvm_toolchain//:all")
+# register_toolchains("@zig_sdk//toolchain:linux_amd64_musl")
+register_toolchains("@zig_sdk//toolchain:linux_amd64_gnu.2.31")
+
+# bazel_dep(name = "tcmalloc", version = "0.0.0-20250927-12f2552", dev_dependency = True)
+# bazel_dep(name = "libpfm", version = "4.11.0.bcr.1", dev_dependency = True)
+
+################################################################################
+# development tools
+################################################################################
+
+# bazel build --config=clang-tidy -k //...
+bazel_dep(name = "bazel_clang_tidy", dev_dependency = True)
+git_override(
+    module_name = "bazel_clang_tidy",
+    remote = "https://github.com/erenon/bazel_clang_tidy.git",
+    commit = "db677011c7363509a288a9fb3bf0a50830bbf791",
+)
+
+# bazel build --config=clang-format -k //...
+bazel_dep(name = "bazel_clang_format", dev_dependency = True)
+git_override(
+    module_name = "bazel_clang_format",
+    remote = "https://github.com/oliverlee/bazel_clang_format.git",
+    commit = "af6c342dc592ad4f1af76d0260aac90d5c9b426f",
+)
+
+# bazel run @hedron_compile_commands//:refresh_all
+bazel_dep(name = "hedron_compile_commands", dev_dependency = True)
+git_override(
+    module_name = "hedron_compile_commands",
+    remote = "https://github.com/hedronvision/bazel-compile-commands-extractor.git",
+    commit = "4f28899228fb3ad0126897876f147ca15026151e",
+)
+
+################################################################################
+# lua
+################################################################################
+
+bazel_dep(name = "lua", version = "5.4.6", dev_dependency = True)
+bazel_dep(name = "luajit", dev_dependency = True)
+archive_override(
+    module_name = "luajit",
+    integrity = "sha256-KG1KNUmzyJXagQikS9ezcm28MovGisarGoI3pbFkEuM=",
+    strip_prefix = "bazel-luajit-b8f669dad9efa5c5b0d827bf34490bb7cc6bdd39",
+    urls = ["https://github.com/eak1mov/bazel-luajit/archive/b8f669dad9efa5c5b0d827bf34490bb7cc6bdd39.zip"],
+)
+bazel_dep(name = "flatbuffers_lua", dev_dependency = True)
+archive_override(
+    module_name = "flatbuffers_lua",
+    integrity = "sha256-cmraUbRbwq3E4DHaCUbQwyk8ifGX+0WGFt0HNbKISks=",
+    strip_prefix = "bazel-flatbuffers-lua-0249e90030efc4c098a3ee68d114ac0a6a53aedf",
+    urls = ["https://github.com/eak1mov/bazel-flatbuffers-lua/archive/0249e90030efc4c098a3ee68d114ac0a6a53aedf.zip"],
+)
+
+################################################################################
+# testdata
+################################################################################
+
+http_archive = use_repo_rule("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
+
+http_archive(
+    name = "testdata_input",
+    integrity = "sha256-TIXLM63zCBMfruDQnPRoFJ8ZMg6V6YS6ZJhRRBb+tq4=",
+    strip_prefix = "libtiles-testdata-index-v0.2.0",
+    urls = ["https://github.com/eak1mov/libtiles-testdata/archive/index-v0.2.0.tar.gz"],
+    build_file = "//bazel:build_testdata_input.bazel",
+)
+
+# generated from @testdata_input by //testdata:testdata_output
+http_archive(
+    name = "testdata_output",
+    integrity = "sha256-937ZansT5oPFNHemd8JRKVo1DPoaoE2paF2hz5FR5WE=",
+    urls = ["https://github.com/eak1mov/libtiles-testdata/raw/refs/tags/wt-v0.1.0/testdata_output.tar.gz"],
+    build_file = "//bazel:build_testdata_output.bazel",
+)
+
+################################################################################

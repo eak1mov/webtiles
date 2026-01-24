@@ -1,0 +1,68 @@
+namespace webtiles.fbs;
+
+enum HeaderSignature: uint64 { Invalid = 0, Value = 0x53454C495457 }
+enum HeaderVersion: uint64 { Invalid = 0, V01 = 1 }
+enum HeaderSize: uint64 { Regular = 192, Extended = 512 }
+
+enum IndexMagic: uint64 { Invalid = 0, Value = 0x58495457 }
+enum IndexFormat: uint64 { Invalid = 0, BasicPlain = 1, Plain = 2, Sparse = 3 }
+
+struct FileHeader {
+    signature: HeaderSignature; // File signature
+    version: HeaderVersion; // File format version
+
+    // Tile data section.
+    // Stores deduplicated tile data sequentially, without any delimiters.
+    data_offset: uint64;
+    data_size: uint64;
+
+    // Tile index section.
+    // For each tile stores it's size and offset in the file (inside tile data section).
+    index_offset: uint64;
+    index_size: uint64;
+
+    // Optional metadata section (with custom user data).
+    // Arbitrary blob in user-defined format.
+    metadata_offset: uint64;
+    metadata_size: uint64;
+
+    // Fixed-size extended header (with custom user data).
+    // Arbitrary blob in user-defined format.
+    // Must be inside [HeaderSize_Regular, HeaderSize_Extended).
+    extended_offset: uint64;
+    extended_size: uint64;
+
+    // Reserved for future versions (do not modify)
+    reserved1: uint64;
+    reserved2: uint64;
+}
+
+struct IndexHeader {
+    magic: IndexMagic;
+    format: IndexFormat;
+
+    max_zoom: uint64; // Max zoom level
+    block_levels_mask: uint64; // Zoom levels of block roots, stored as bitmask
+
+    // Location of the root block (for sparse index format), relative to index section
+    root_offset: uint64;
+    root_size: uint64;
+
+    // Reserved for future versions (do not modify)
+    // TODO(eak1mov): replace with array when avaliable for golang and lua
+    reserved1: uint64;
+    reserved2: uint64;
+    reserved3: uint64;
+    reserved4: uint64;
+    reserved5: uint64;
+    reserved6: uint64;
+}
+
+struct Header {
+    file_header: FileHeader;
+    index_header: IndexHeader;
+}
+
+// Fake root_type value to prevent lua flatc from crashing
+table FakeRoot { }
+root_type FakeRoot;

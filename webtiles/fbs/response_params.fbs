@@ -1,0 +1,10 @@
+namespace webtiles.fbs;
+
+// Optional dataset parameters (often required to serve tiles).
+// We don't want to use information from metadata section, as it would require an additional file request.
+table ResponseParams {
+    content_type: string; // Content-Type HTTP header
+    content_encoding: string; // Content-Encoding HTTP header
+}
+
+root_type ResponseParams;
