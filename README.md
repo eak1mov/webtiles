@@ -1,5 +1,9 @@
 # WebTiles: A Modern Tile Storage Format
 
+[![License](https://img.shields.io/github/license/eak1mov/webtiles)](https://github.com/eak1mov/webtiles/blob/main/LICENSE)
+[![NPM Package](https://img.shields.io/npm/v/webtiles)](https://www.npmjs.com/package/webtiles)
+[![GitHub Repo](https://img.shields.io/github/stars/eak1mov/webtiles)](https://github.com/eak1mov/webtiles)
+
 WebTiles is a high-performance file format designed for storing and serving large collections of map tiles (raster or vector tiles).  
 It's a single-file container that enables extremely fast random access, overcoming some limitations of formats like PMTiles, MBTiles and file-per-tile storage.  
 The format is defined by FlatBuffers schema for portability and provides C++ and Lua implementations.
