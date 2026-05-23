@@ -13,6 +13,7 @@
 local HeaderVersion = {
   Invalid = 0,
   V01 = 1,
+  V02 = 2,
 }
 
 return HeaderVersion

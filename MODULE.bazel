@@ -2,7 +2,7 @@
 WebTiles: Modern Tile Storage Format
 """
 
-module(name = "webtiles", version = "0.1.0")
+module(name = "webtiles", version = "0.2.0")
 
 bazel_dep(name = "abseil-cpp", version = "20250512.1")
 bazel_dep(name = "flatbuffers", version = "25.2.10")
@@ -107,8 +107,8 @@ http_archive(
 # generated from @testdata_input by //testdata:testdata_output
 http_archive(
     name = "testdata_output",
-    integrity = "sha256-937ZansT5oPFNHemd8JRKVo1DPoaoE2paF2hz5FR5WE=",
-    urls = ["https://github.com/eak1mov/libtiles-testdata/raw/refs/tags/wt-v0.1.0/testdata_output.tar.gz"],
+    integrity = "sha256-4UGRJh3rOkeTlcf2WR2F9SHmcoW29VEJpKeHDnJValo=",
+    urls = ["https://github.com/eak1mov/libtiles-testdata/raw/refs/tags/wt-v0.2.0/testdata_output.tar.gz"],
     build_file = "//bazel:build_testdata_output.bazel",
 )
 

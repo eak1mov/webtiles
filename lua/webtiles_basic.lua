@@ -43,7 +43,7 @@ local function readTileLocation(x, y, z, fileAccess)
     local indexHeader = header:IndexHeader(IndexHeader.New())
 
     assert(tonumber(fileHeader:Signature()) == HeaderSignature.Value)
-    assert(tonumber(fileHeader:Version()) == HeaderVersion.V01)
+    assert(tonumber(fileHeader:Version()) == HeaderVersion.V02)
     assert(tonumber(indexHeader:Format()) == IndexFormat.BasicPlain)
 
     assert(z <= tonumber(indexHeader:MaxZoom()))
@@ -56,6 +56,8 @@ local function readTileLocation(x, y, z, fileAccess)
 
     local tileLocationData = fileAccess(tileLocationOffset, PACKED_LOCATION_SIZE)
     local tileLocation = unpackLocationBytes(tileLocationData)
+
+    tileLocation.offset = tileLocation.offset + tonumber(fileHeader:DataOffset())
 
     return tileLocation
 end

@@ -4,5 +4,6 @@
 
 export enum HeaderVersion {
   Invalid = '0',
-  V01 = '1'
+  V01 = '1',
+  V02 = '2'
 }

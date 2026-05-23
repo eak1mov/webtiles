@@ -140,7 +140,7 @@ WriterImpl::WriterImpl(WriterParams writerParams)
     fbs::FileHeader& fileHeader = header_.mutable_file_header();
 
     fileHeader.mutate_signature(fbs::HeaderSignature_Value);
-    fileHeader.mutate_version(fbs::HeaderVersion_V01);
+    fileHeader.mutate_version(fbs::HeaderVersion_V02);
 
     // reserve memory for header section (will be overwritten in finalize)
     ostream_.write(std::string(fbs::HeaderSize_Extended, 0).data(), fbs::HeaderSize_Extended);
@@ -174,7 +174,7 @@ void WriterImpl::writeTile(TileId tileId, std::string_view tileData, std::string
         tileLocation = it->second;
     } else {
         tileLocation = {
-            .offset = uint64_t(ostream_.tellp()),
+            .offset = uint64_t(ostream_.tellp()) - header_.file_header().data_offset(),
             .size = tileData.size(),
         };
         tiles_[tileDataHash] = tileLocation;

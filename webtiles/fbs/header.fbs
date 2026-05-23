@@ -1,7 +1,7 @@
 namespace webtiles.fbs;
 
 enum HeaderSignature: uint64 { Invalid = 0, Value = 0x53454C495457 }
-enum HeaderVersion: uint64 { Invalid = 0, V01 = 1 }
+enum HeaderVersion: uint64 { Invalid = 0, V01 = 1, V02 = 2 }
 enum HeaderSize: uint64 { Regular = 192, Extended = 512 }
 
 enum IndexMagic: uint64 { Invalid = 0, Value = 0x58495457 }

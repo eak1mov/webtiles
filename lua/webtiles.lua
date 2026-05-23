@@ -298,7 +298,7 @@ local function readTileLocation(x, y, z, fileAccess)
         error(ERROR_INVALID_FILE_FORMAT)
     end
     local headerVersion = fileHeader:Version()
-    if tonumber(headerVersion) ~= HeaderVersion.V01 then
+    if tonumber(headerVersion) ~= HeaderVersion.V02 then
         error(ERROR_INVALID_VERSION)
     end
 
@@ -343,6 +343,9 @@ local function readTileLocation(x, y, z, fileAccess)
     else
         error(ERROR_INVALID_DATASET)
     end
+
+    local dataOffset = fileHeader:DataOffset()
+    tileLocation.offset = tileLocation.offset + tonumber(dataOffset)
 
     return tileLocation, extendedHeader
 end

@@ -21,7 +21,7 @@ export class Reader {
     if (fileHeader.signature() !== BigInt(fbs.HeaderSignature.Value)) {
       throw new ic.InvalidFileFormatError();
     }
-    if (fileHeader.version() > Math.max(...Object.values(fbs.HeaderVersion).map(Number))) {
+    if (fileHeader.version() !== BigInt(fbs.HeaderVersion.V02)) {
       throw new ic.InvalidVersionError();
     }
 
@@ -75,6 +75,8 @@ export class Reader {
           throw new ic.InvalidDatasetError();
       }
     })();
+
+    tileLocation.offset += Number(fileHeader.dataOffset())
 
     return this.fileAccess(tileLocation.offset, tileLocation.size);
   }

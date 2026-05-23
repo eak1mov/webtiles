@@ -131,6 +131,6 @@ TEST(ReaderTest, Empty10Sparse)
     EXPECT_NO_THROW(reader->readTileData(wt::TileId(0, 0, 0)));
 
     for (uint32_t z = 0; z < 10; ++z) {
-        ASSERT_EQ(wt::PackedLocation(0, 0), reader->readTileLocation(wt::TileId(0, 0, z)));
+        ASSERT_EQ(0u, reader->readTileLocation(wt::TileId(0, 0, z)).size);
     }
 }

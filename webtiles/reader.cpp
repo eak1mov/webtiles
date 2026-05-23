@@ -47,7 +47,7 @@ ReaderImpl::ReaderImpl(const FileAccess& fileAccess)
     if (fileHeader.signature() != fbs::HeaderSignature_Value) {
         throw InvalidFileFormatError("Invalid signature");
     }
-    if (fileHeader.version() > fbs::HeaderVersion_MAX) {
+    if (fileHeader.version() != fbs::HeaderVersion_MAX) {
         throw InvalidVersionError("Invalid version " + std::to_string(fileHeader.version()));
     }
 
@@ -77,7 +77,9 @@ PackedLocation ReaderImpl::readTileLocation(TileId tileId) const
         return fileAccess_(location);
     };
 
-    return index::queryIndex(header_.index_header(), indexAccess, tileId);
+    PackedLocation tileLocation = index::queryIndex(header_.index_header(), indexAccess, tileId);
+    tileLocation.offset += header_.file_header().data_offset();
+    return tileLocation;
 }
 
 internal::TilesRange ReaderImpl::allTiles() const
@@ -87,12 +89,16 @@ internal::TilesRange ReaderImpl::allTiles() const
 
 internal::TileLocationsRange ReaderImpl::allTileLocations() const
 {
-    return index::readIndex(
+    auto index = index::readIndex(
         header_.index_header(),
         fileAccess_({
             .offset = header_.file_header().index_offset(),
             .size = header_.file_header().index_size(),
         }));
+    for (auto& [tileId, tileLocation] : index) {
+        tileLocation.offset += header_.file_header().data_offset();
+    }
+    return index;
 }
 
 } // namespace
